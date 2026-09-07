@@ -1,0 +1,14 @@
+[package]
+name = "beatfunge"
+version = "0.1.0"
+edition = "2021"
+description = "BEATfunge: el esolang musical bare-metal de BEAT con control de flujo geometrico (Befunge)"
+license = "MIT"
+
+[lib]
+name = "beatfunge"
+path = "src/lib.rs"
+
+[[bin]]
+name = "beatfunge"
+path = "src/main.rs"
