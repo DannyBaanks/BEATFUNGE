@@ -86,18 +86,18 @@ sectores 2-5  motor BEATfunge
 sector 6    grid 32 x 16
 ```
 
-El motor implementa direcciones, bifurcaciones `_`/`|`, puente `#`, `T`, `D`,
-`N`, `.`, `P`, `+`, `-`, `{`, `}`, `R`, `W`, `S`, `H` y `@`. Usa una espera por
-CPU para las duraciones: el test de BEAT/Kaleidoscope encontro que el sondeo de
-ticks BIOS mediante `INT 1Ah` podia colapsar duraciones en esta configuracion
-de captura QEMU. La calibracion exacta de tempo BEAT sigue
-`NOT_DEMONSTRATED`.
+El motor implementa todas las instrucciones: direcciones, bifurcaciones `_`/`|`,
+puente `#`, `T`, `D`, `N`, `.`, `,`, `P`, `+`, `-`, `{`, `}`, `R`, `W`, `S`,
+`[` (loop start), `]` (loop end), `H` y `@`. Usa una espera por CPU para las
+duraciones: el test de BEAT/Kaleidoscope encontro que el sondeo de ticks BIOS
+mediante `INT 1Ah` podia colapsar duraciones en esta configuracion de captura
+QEMU.
 
 La primera evidencia independiente es `01_escala.grid`: QEMU arranco la imagen
 y su WAV del PC speaker midio `440, 495, 525, 585, 660, 700, 785 Hz`, dentro de
 12 Hz de las siete notas esperadas. Los otros ocho grids tambien producen
-WAV validos por QEMU (ver `test_all_grids.py`). Los opcodes `,`, `[` y
-`]` en bare-metal siguen `NOT_DEMONSTRATED`.
+WAV validos por QEMU (ver `test_all_grids.py`). `10_loop_test.grid` verifica
+que `[`/`]` funcionan en bare-metal (loop de 3 iteraciones).
 
 ## Ejecutar
 
@@ -106,7 +106,7 @@ cargo test
 cargo run -- equiv
 cargo run -- run programs/07_dos_voces.grid --verbose
 py baremetal/build.py programs/01_escala.grid
-py baremetal/test_qemu.py
+py baremetal/test_all_grids.py
 ```
 
 ## Estado
@@ -114,10 +114,11 @@ py baremetal/test_qemu.py
 - Simulador Rust: `PASS`
 - 9/9 ports canonicos: `PASS`
 - Saltos absolutos en ports 2D: `0`
+- Motor bare-metal: todas las instrucciones implementadas
 - Bare-metal/QEMU, `01_escala.grid`: `PASS` (precision)
 - Bare-metal/QEMU, `08_drone.grid`: `PASS` (precision)
 - Bare-metal/QEMU, otros 7 grids: `PASS` (empirico — WAV producido)
-- `,`, `[` y `]` en bare-metal: `NOT_DEMONSTRATED`
+- Bare-metal/QEMU, `10_loop_test.grid`: `PASS` (loops verificados)
 
 ## Licencia
 
