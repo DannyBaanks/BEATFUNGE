@@ -3,10 +3,10 @@
 **BEAT con el flujo de control geometrico de Befunge, en un sector fisico de
 32 x 16 celdas.**
 
-El proyecto arranca como un simulador de referencia en Rust. Conserva la
-semantica musical de [BEAT](https://github.com/DannyBaanks/BEAT) y sustituye
-los saltos absolutos `J`/`Z` por una rejilla toroidal. No es todavia un motor
-bare-metal ni ha sido arrancado en QEMU: eso sigue `NOT_DEMONSTRATED`.
+El proyecto conserva la semantica musical de
+[BEAT](https://github.com/DannyBaanks/BEAT) y sustituye los saltos absolutos
+`J`/`Z` por una rejilla toroidal. Incluye un simulador de referencia en Rust y
+un nucleo NASM arrancable que ya demostro la escala 2D en QEMU.
 
 ## El Hallazgo
 
@@ -74,12 +74,39 @@ Esto significa solo que los nueve programas producen la misma secuencia de
 notas, silencios, pausas, toggles y alto bajo el simulador. No demuestra salida
 de audio real ni equivalencia universal de los lenguajes.
 
+## Bare Metal
+
+`baremetal/boot.asm` carga un motor NASM de cuatro sectores y el grid como el
+sector 6. El programa conserva su forma de 32 x 16 y no contiene direcciones
+absolutas.
+
+```text
+sector 1    bootloader
+sectores 2-5  motor BEATfunge
+sector 6    grid 32 x 16
+```
+
+El motor implementa direcciones, bifurcaciones `_`/`|`, puente `#`, `T`, `D`,
+`N`, `.`, `P`, `+`, `-`, `{`, `}`, `R`, `W`, `S`, `H` y `@`. Usa una espera por
+CPU para las duraciones: el test de BEAT/Kaleidoscope encontro que el sondeo de
+ticks BIOS mediante `INT 1Ah` podia colapsar duraciones en esta configuracion
+de captura QEMU. La calibracion exacta de tempo BEAT sigue
+`NOT_DEMONSTRATED`.
+
+La primera evidencia independiente es `01_escala.grid`: QEMU arranco la imagen
+y su WAV del PC speaker midio `440, 495, 525, 585, 660, 700, 785 Hz`, dentro de
+12 Hz de las siete notas esperadas. Los opcodes `,`, `[` y
+`]`, y la matriz bare-metal de los otros ocho programas siguen
+`NOT_DEMONSTRATED`.
+
 ## Ejecutar
 
 ```powershell
 cargo test
 cargo run -- equiv
 cargo run -- run programs/07_dos_voces.grid --verbose
+py baremetal/build.py programs/01_escala.grid
+py baremetal/test_qemu.py
 ```
 
 ## Estado
@@ -87,7 +114,9 @@ cargo run -- run programs/07_dos_voces.grid --verbose
 - Simulador Rust: `PASS`
 - 9/9 ports canonicos: `PASS`
 - Saltos absolutos en ports 2D: `0`
-- Motor bare-metal / sector arrancable / QEMU: `NOT_DEMONSTRATED`
+- Bare-metal/QEMU, `01_escala.grid`: `PASS`
+- Otros ocho ports en bare-metal: `NOT_DEMONSTRATED`
+- `,`, `[` y `]` en bare-metal: `NOT_DEMONSTRATED`
 
 ## Licencia
 

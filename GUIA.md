@@ -5,8 +5,30 @@ cargo run -- equiv
 ```
 
 **Regla de oro:** un `PASS` del simulador no significa que el PC speaker haya
-sonado. Hasta que exista un motor arrancable y una corrida QEMU, el audio real
-es `NOT_DEMONSTRATED`.
+sonado. Solo `baremetal/test_qemu.py` demuestra audio real, y hoy esa evidencia
+cubre exclusivamente `01_escala.grid`.
+
+## Arrancar La Escala En QEMU
+
+```powershell
+py baremetal/build.py programs/01_escala.grid
+py baremetal/test_qemu.py
+```
+
+Salida real verificada:
+
+```text
+IMAGEN: C:\Development\ISyCo Git\BEATFUNGE\build\BEATFUNGE.img
+GRID:   C:\Development\ISyCo Git\BEATFUNGE\programs\01_escala.grid (512 bytes, sector 6)
+LAYOUT: boot sector 1; engine sectors 2-5; grid sector 6
+QEMU termino con 1 (1 indica halt via isa-debug-exit)
+NOTAS: [440.0, 495.0, 525.0, 585.0, 660.0, 700.0, 785.0]
+PASA: grid 2D -> PIT -> PC speaker -> WAV en QEMU
+```
+
+El test espera siete notas con una tolerancia de 12 Hz. `nasm` y
+`qemu-system-i386` deben estar disponibles en `PATH`; `QEMU` puede indicar una
+ruta explicita al binario de QEMU.
 
 ## Verificar Los Nueve Ports
 
@@ -86,3 +108,8 @@ de 32 bytes se rechaza en lugar de cortar codigo silenciosamente.
 - `J` y `Z` son invalidos. Usa `_` o `|`.
 - `S` no crea polifonia: el PC speaker es monofonico. Dos voces se representan
   por una ruta que alterna notas rapidamente.
+- El motor bare-metal todavia no implementa `,`, `[` ni `]`; los nueve ports
+  siguen cubiertos por el simulador Rust, pero solo `01_escala.grid` tiene
+  evidencia de audio QEMU.
+- La duracion bare-metal usa una espera de CPU para mantener notas observables
+  en QEMU; no es todavia una calibracion exacta del tempo de BEAT.
