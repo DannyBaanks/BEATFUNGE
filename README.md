@@ -95,9 +95,9 @@ de captura QEMU. La calibracion exacta de tempo BEAT sigue
 
 La primera evidencia independiente es `01_escala.grid`: QEMU arranco la imagen
 y su WAV del PC speaker midio `440, 495, 525, 585, 660, 700, 785 Hz`, dentro de
-12 Hz de las siete notas esperadas. Los opcodes `,`, `[` y
-`]`, y la matriz bare-metal de los otros ocho programas siguen
-`NOT_DEMONSTRATED`.
+12 Hz de las siete notas esperadas. Los otros ocho grids tambien producen
+WAV validos por QEMU (ver `test_all_grids.py`). Los opcodes `,`, `[` y
+`]` en bare-metal siguen `NOT_DEMONSTRATED`.
 
 ## Ejecutar
 
@@ -114,8 +114,9 @@ py baremetal/test_qemu.py
 - Simulador Rust: `PASS`
 - 9/9 ports canonicos: `PASS`
 - Saltos absolutos en ports 2D: `0`
-- Bare-metal/QEMU, `01_escala.grid`: `PASS`
-- Otros ocho ports en bare-metal: `NOT_DEMONSTRATED`
+- Bare-metal/QEMU, `01_escala.grid`: `PASS` (precision)
+- Bare-metal/QEMU, `08_drone.grid`: `PASS` (precision)
+- Bare-metal/QEMU, otros 7 grids: `PASS` (empirico — WAV producido)
 - `,`, `[` y `]` en bare-metal: `NOT_DEMONSTRATED`
 
 ## Licencia

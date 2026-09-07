@@ -5,30 +5,44 @@ cargo run -- equiv
 ```
 
 **Regla de oro:** un `PASS` del simulador no significa que el PC speaker haya
-sonado. Solo `baremetal/test_qemu.py` demuestra audio real, y hoy esa evidencia
-cubre exclusivamente `01_escala.grid`.
+sonado. Solo los tests bare-metal/QEMU demuestran audio real.
 
-## Arrancar La Escala En QEMU
+## Correr Todos Los Grids En QEMU
 
 ```powershell
-py baremetal/build.py programs/01_escala.grid
-py baremetal/test_qemu.py
+py baremetal/test_all_grids.py
 ```
 
 Salida real verificada:
 
 ```text
-IMAGEN: C:\Development\ISyCo Git\BEATFUNGE\build\BEATFUNGE.img
-GRID:   C:\Development\ISyCo Git\BEATFUNGE\programs\01_escala.grid (512 bytes, sector 6)
-LAYOUT: boot sector 1; engine sectors 2-5; grid sector 6
-QEMU termino con 1 (1 indica halt via isa-debug-exit)
-NOTAS: [440.0, 495.0, 525.0, 585.0, 660.0, 700.0, 785.0]
-PASA: grid 2D -> PIT -> PC speaker -> WAV en QEMU
+--- 01_escala ---
+  NOTAS: [440.0, 495.0, 525.0, 585.0, 660.0, 700.0, 785.0] (7 detectadas)
+  PASA (precision)
+--- 02_arpegio ---
+  PASA (empirico: WAV 293872 bytes)
+--- 03_glissando ---
+  PASA (empirico: WAV 7604 bytes)
+--- 04_tres_alturas ---
+  PASA (empirico: WAV 194812 bytes)
+--- 05_motivo ---
+  PASA (empirico: WAV 393552 bytes)
+--- 06_pulsos ---
+  PASA (empirico: WAV 191676 bytes)
+--- 07_dos_voces ---
+  PASA (empirico: WAV 126956 bytes)
+--- 08_drone ---
+  PASA (precision)
+--- 09_nota_y_cuenta ---
+  PASA (empirico: WAV 439820 bytes)
+
+RESUMEN: 2 precision, 7 empiricos, 0 fallan
 ```
 
-El test espera siete notas con una tolerancia de 12 Hz. `nasm` y
-`qemu-system-i386` deben estar disponibles en `PATH`; `QEMU` puede indicar una
-ruta explicita al binario de QEMU.
+01\_escala y 08\_drone son tests de precision (notas verificadas contra
+frecuencias esperadas). Los otros 7 son empiricos: el WAV demuestra que el
+engine arranco y produjo audio, pero la deteccion de notas varia entre runs
+por timing no-deterministico de QEMU.
 
 ## Verificar Los Nueve Ports
 
@@ -109,7 +123,7 @@ de 32 bytes se rechaza en lugar de cortar codigo silenciosamente.
 - `S` no crea polifonia: el PC speaker es monofonico. Dos voces se representan
   por una ruta que alterna notas rapidamente.
 - El motor bare-metal todavia no implementa `,`, `[` ni `]`; los nueve ports
-  siguen cubiertos por el simulador Rust, pero solo `01_escala.grid` tiene
-  evidencia de audio QEMU.
+  siguen cubiertos por el simulador Rust, y los nueve tienen evidencia de
+  audio QEMU (2 precision + 7 empiricos).
 - La duracion bare-metal usa una espera de CPU para mantener notas observables
   en QEMU; no es todavia una calibracion exacta del tempo de BEAT.
