@@ -93,6 +93,12 @@ main_loop:
     je tape_write
     cmp al, 'S'
     je speaker_toggle
+    cmp al, ','
+    je read_key
+    cmp al, '['
+    je loop_start
+    cmp al, ']'
+    je loop_end
     call advance
     jmp main_loop
 
@@ -218,6 +224,81 @@ speaker_toggle:
     in al, 0x61
     xor al, 3
     out 0x61, al
+    jmp step
+
+; --- , read keypress via INT 16h, store in REG ---
+read_key:
+    xor ah, ah
+    int 0x16
+    xor ah, ah
+    mov [REG], ax
+    jmp step
+
+; --- [ loop start: if REG == 0, skip to matching ] ---
+loop_start:
+    cmp word [REG], 0
+    jne step
+    ; REG == 0: search forward for matching ] at depth 1
+    mov bx, 1
+.loop:
+    push bx
+    call advance
+    call fetch
+    pop bx
+    cmp al, '['
+    jne .not_open
+    inc bx
+    jmp .loop
+.not_open:
+    cmp al, ']'
+    jne .loop
+    dec bx
+    jnz .loop
+    ; found matching ] at depth 0; advance past it
+    jmp step
+
+; --- ] loop end: jump back to matching [ ---
+loop_end:
+    ; search backward (reverse current direction) for matching [
+    ; save current direction, reverse it for the search
+    mov al, [IP_DIR]
+    push ax
+    cmp al, RIGHT
+    je .rev_left
+    cmp al, LEFT
+    je .rev_right
+    cmp al, UP
+    je .rev_down
+    ; was DOWN → reverse is UP
+    mov byte [IP_DIR], UP
+    jmp .search
+.rev_left:
+    mov byte [IP_DIR], LEFT
+    jmp .search
+.rev_right:
+    mov byte [IP_DIR], RIGHT
+    jmp .search
+.rev_down:
+    mov byte [IP_DIR], DOWN
+.search:
+    mov bx, 1
+.loop:
+    push bx
+    call advance
+    call fetch
+    pop bx
+    cmp al, ']'
+    jne .not_close
+    inc bx
+    jmp .loop
+.not_close:
+    cmp al, '['
+    jne .loop
+    dec bx
+    jnz .loop
+    ; found matching [; restore original direction, advance past it
+    pop ax
+    mov [IP_DIR], al
     jmp step
 
 step:

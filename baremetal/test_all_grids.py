@@ -26,7 +26,7 @@ GRIDS = {
     "05_motivo":        None,
     "06_pulsos":        None,
     "07_dos_voces":     None,
-    "08_drone":         [165.0],
+    "08_drone":         [165.0, 330.0],
     "09_nota_y_cuenta": None,
 }
 
